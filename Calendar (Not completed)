@@ -1,0 +1,145 @@
+# Problem from YouTube video "Google Coding Interview With A College Student" from Clément Mihailescu
+
+# https://youtu.be/3Q_oYDQ2whs
+
+# Sample input:
+
+# calendar1 = [['9:00','10:30'],['12:00','13:00'],['16:00','18:00']]
+# dailyBound1 = ['8:00','18:00']
+# calendar2 = [['10:00','11:30'],['12:30','14:30'],['14:30','15:00'],['16:00','17:00']]
+# dailyBound2 = ['10:00','18:30']
+
+
+# Sample output:
+
+# available = [['11:30','12:00'],['15:00','16:00'],['18:00','18:30']]
+
+
+--------------------------------------------------------------------------------
+
+
+# Setting initial variables
+
+calendar1 = [['9:00','10:30'],['12:00','13:00'],['16:00','18:00']]
+dailyBound1 = ['8:00','18:00']
+calendar2 = [['10:00','11:30'],['12:30','14:30'],['14:30','15:00'],['16:00','17:00']]
+dailyBound2 = ['10:00','18:30']
+
+available = [0,0]
+
+
+# Setting available hours based on daily bounds
+
+dailyBound1 = [int(dailyBound1[0].split(':')[0])*60+int((dailyBound1[0].split(':')[1])), 
+               int(dailyBound1[1].split(':')[0])*60+int((dailyBound1[1].split(':')[1]))]
+
+dailyBound2 = [int(dailyBound2[0].split(':')[0])*60+int((dailyBound2[0].split(':')[1])), 
+               int(dailyBound2[1].split(':')[0])*60+int((dailyBound2[1].split(':')[1]))]
+
+for i in range(2):
+    if dailyBound1[0] < dailyBound2[0]:
+        available[0] = dailyBound1[0]
+    else:
+        available[0] = dailyBound2[0]
+
+    if dailyBound1[1] > dailyBound2[1]:
+        available[1] = dailyBound1[1]
+    else:
+        available[1] = dailyBound2[1]
+
+print('\nExpected available minutes:','\n [480, 1110]\n','\nAvailable minutes:\n',available,'\n')
+
+
+# Setting available hours based on busy minutes
+
+busyMin = []
+
+for i in range(len(calendar1)):
+    busyMin.append([0,0])
+    busyMin[i][0] = int(calendar1[i][0].split(':')[0])*60+int(calendar1[i][0].split(':')[1])
+    busyMin[i][1] = int(calendar1[i][1].split(':')[0])*60+int(calendar1[i][0].split(':')[1])
+
+for i in range(len(calendar1),len(calendar1)+len(calendar2)):
+    busyMin.append([0,0])
+    busyMin[i][0] = int(calendar2[i-len(calendar1)][0].split(':')[0])*60+int(calendar2[i-len(calendar1)][0].split(':')[1])
+    busyMin[i][1] = int(calendar2[i-len(calendar1)][1].split(':')[0])*60+int(calendar2[i-len(calendar1)][0].split(':')[1])
+
+print('Expected busy minutes:\n [[540, 600], [720, 780], [960, 1080], [600, 660], [750, 870], [870, 930], [960, 1020]]\n',
+      '\nBusy minutes:\n',busyMin)
+
+
+# Grouping the minutes that intersects each other
+
+for i in range(len(busyMin)-1):
+    for j in range(len(busyMin)-1):
+        if i != j and busyMin[i][0] <= busyMin[j][1] and busyMin[i][1] >= busyMin[j][0]:
+            if busyMin[i][0] > busyMin[j][0]:
+                busyMin[i][0] = busyMin[j][0]
+            if busyMin[i][1] < busyMin[j][1]:
+                busyMin[i][1] = busyMin[j][1]
+            busyMin.remove(busyMin[j])
+            busyMin.append([0,0])
+
+
+# Removing invalid values
+for i in range(busyMin.count([0,0])):
+    busyMin.remove([0,0])
+
+busyMin.sort()
+print('Expected busy minutes:\n [[540, 660], [720, 930], [960, 1080]] \n','\nBusy minutes of both:\n',busyMin,'\n')
+
+
+# Getting the minutes that are available
+
+available = [480, 1110]
+busyMin = [[540, 660], [720, 930], [960, 1080]]
+available2 = []
+
+if available[0] < busyMin[0][0]:
+    available2.append([available[0],busyMin[0][0]])
+
+if available[1] > busyMin[-1][1]:
+    available2.append([available[1],busyMin[-1][1]])
+
+for i in range(1,len(busyMin)):
+    print('iteration')
+
+print(available2)
+
+
+# Getting the minutes that are available
+
+available = [480, 1110]
+busyMin = [[540, 660], [720, 930], [960, 1080]]
+available2 = []
+
+for i in range(len(busyMin)):
+    if available[0] >= busyMin[i][0] and available[0] <= busyMin[i][1]:
+        available[0] = busyMin[i][1]
+    if available[1] <= busyMin[i][1] and available[1] >= busyMin[i][0]:
+        available[1] = busyMin[i][0]
+    if available[0] < busyMin[i][0] and available[1] > busyMin[i][1]:
+        available2.append([available[0],busyMin[i][0]])
+        available2.append([busyMin[i][1],available[1]])
+
+
+# Removing the initial values        
+
+available.remove(available[0])
+available.remove(available[0])
+
+
+# Turning integers of minutes to strings of hour and minutes (JUST A TEST - NOT COMPLETED)
+
+testMin = [600,1320]
+testHour = ['','']
+
+for i in range(2):
+    if testMin[i]//60 < 10 and testMin[i]%60 < 10:
+        testHour[i] = '0',str(testMin[i]//60)+':0'+str(testMin[i]%60)
+    elif testMin[i]//60 < 10:
+        testHour[i] = '0',str(testMin[i]//60)+':'+str(testMin[i]%60)
+    elif testMin[i]%60 < 10:
+        testHour[i] = str(testMin[i]//60)+':0'+str(testMin[i]%60)
+
+print('Integers of minutes:\n',testMin,'\n\nStrings of hours and minutes:\n',testHour)
